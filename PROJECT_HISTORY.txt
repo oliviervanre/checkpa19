@@ -1,0 +1,145 @@
+PROJECT HISTORY - CHECKPA19
+
+Purpose
+- Native Android checklist app for cockpit-style use.
+- Kotlin + Jetpack Compose.
+- Single-screen checklist flow, offline only.
+- Static JSON checklist in assets.
+- SharedPreferences used for session restore.
+
+Current Project Location
+- /home/olivier/checkpa19
+
+Repository Status
+- Git repository initialized locally.
+- Current main branch: main
+
+Functional Scope
+- Aircraft: PA19
+- Checklist phases: 1 to 10
+- Ground use only
+- Offline only
+
+Important Product Decisions
+- No over-engineering.
+- No network.
+- No database.
+- No multi-screen navigation for the checklist itself.
+- Priority is instant understanding of the current checklist position.
+- One-hand usage and visual clarity are more important than visual richness.
+
+Checklist Data
+- Source file: app/src/main/assets/checklist_pa19.json
+- JSON currently reflects the user-provided checklist structure:
+  - root field: aircraft
+  - phases with order, name, items
+  - items with id and label
+
+Main Technical Structure
+- MainActivity
+- ChecklistScreen
+- ChecklistViewModel
+- ChecklistJsonLoader
+- SessionStorage
+
+Main Files
+- app/src/main/java/com/example/pa19checklist/MainActivity.kt
+- app/src/main/java/com/example/pa19checklist/ui/screen/ChecklistScreen.kt
+- app/src/main/java/com/example/pa19checklist/viewmodel/ChecklistViewModel.kt
+- app/src/main/java/com/example/pa19checklist/data/ChecklistJsonLoader.kt
+- app/src/main/java/com/example/pa19checklist/data/SessionStorage.kt
+- app/src/main/assets/checklist_pa19.json
+
+Checklist Behavior Implemented
+- Linear progression only.
+- 1 tap = 1 validation.
+- Automatic move to next item.
+- Automatic move to next phase.
+- Automatic scroll to keep current item visible.
+- Exact restore after app close using SharedPreferences.
+- Keep screen on during checklist.
+- Pause button disables keep-screen-on.
+
+Current UX Flow
+1. App start at beginning of a new session:
+   - Full PA19 memo screen is displayed first.
+   - Button: COMMENCER
+2. Checklist flow:
+   - Current phase shown at top.
+   - Current item visually dominant.
+   - Done items greyed.
+   - Next items neutral.
+3. End of checklist:
+   - Only the speed/reference memo is shown.
+   - Button: TERMINER
+4. TERMINER resets session and returns to the start memo for the next run.
+
+Memo Screen Decisions
+- User requested removal of aircraft registration F-BOUF from the memo title.
+- Title now uses PA19 instead.
+- Full memo is displayed at the beginning only.
+- End-of-checklist screen displays only speed/references, not the full memo.
+- No extra warning styling was added for +Kve because the user wants fidelity to the instructor-designed document.
+
+Visual Decisions
+- Keep the UI visually restrained.
+- Avoid adding too many colored backgrounds in checklist rows.
+- Maintain emphasis mainly on the CURRENT item.
+- Section/header can stay visually distinct but not aggressive.
+- User wants to evaluate real-use tests before further visual tuning.
+
+Launcher Icon History
+- Several icon experiments were tried and discarded.
+- Final accepted direction:
+  - use user-provided SVG file
+  - convert it to raster Android launcher assets
+  - pad/resize it so the plane is not clipped by launcher masks
+- Current source used for conversion:
+  - /home/olivier/Images/pa19gpt.svg
+
+Current Launcher Asset Setup
+- Adaptive icon XML:
+  - app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+  - app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+- Foreground art image:
+  - app/src/main/res/drawable-nodpi/ic_launcher_art.png
+- Raster launcher icons generated in:
+  - app/src/main/res/mipmap-mdpi/
+  - app/src/main/res/mipmap-hdpi/
+  - app/src/main/res/mipmap-xhdpi/
+  - app/src/main/res/mipmap-xxhdpi/
+  - app/src/main/res/mipmap-xxxhdpi/
+
+Build Status
+- Project builds successfully with:
+  - ./gradlew :app:assembleDebug
+- Debug APK output:
+  - app/build/outputs/apk/debug/app-debug.apk
+
+What Was Explicitly Requested By The User
+- Stay close to the original checklist and memo document.
+- Avoid inventing procedures or highlighting not present in the source material.
+- Keep the app simple and maintainable.
+- Do not overload the UI visually.
+
+Known Open Topics
+- Real cockpit-style usability still needs field testing.
+- The memo text may still need line-by-line adjustment against the paper original.
+- Additional visual refinement should only be done after practical test feedback.
+- GitHub remote is not configured yet; user plans to push later after recovering access codes.
+
+Useful Commands
+- Build:
+  - cd /home/olivier/checkpa19
+  - ./gradlew :app:assembleDebug
+- APK path:
+  - /home/olivier/checkpa19/app/build/outputs/apk/debug/app-debug.apk
+- Uninstall from emulator/device:
+  - adb uninstall com.example.pa19checklist
+
+Continuation Guidance
+- If work resumes later, start by checking:
+  - the current memo content against the paper reference
+  - the end-of-checklist behavior on device
+  - launcher icon appearance on the actual target launcher
+- Do not revert to the old golf-score project. The active project is checkpa19 only.
