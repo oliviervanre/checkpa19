@@ -1,0 +1,134 @@
+{
+  "aircraft": "PA19",
+  "phases": [
+    {
+      "order": 1,
+      "name": "1. INSTALLATION CABINE",
+      "items": [
+        { "id": 1, "label": "Masse / Centrage Calculée / Vérifié" },
+        { "id": 2, "label": "Verrière Nettoyée" },
+        { "id": 3, "label": "Visite prévol Effectuée" },
+        { "id": 4, "label": "Chargement Arrimé" },
+        { "id": 5, "label": "Documents / Carnet route Contrôlés et à bord" },
+        { "id": 6, "label": "Siège avant Réglé et Bloqué" },
+        { "id": 7, "label": "Ceintures Avant (Pilote) Brêlées" },
+        { "id": 8, "label": "Ceintures Arrière Attachées" },
+        { "id": 9, "label": "Horamètre Comparé / Noté" }
+      ]
+    },
+    {
+      "order": 2,
+      "name": "2. PREPARATION DU POSTE",
+      "items": [
+        { "id": 1, "label": "Porte Fermée et Enclenchée" },
+        { "id": 2, "label": "Commandes de vol Libres et Bon sens" },
+        { "id": 3, "label": "Compensateur Débattement vérifié" },
+        { "id": 4, "label": "Contact magnétos Sur OFF" },
+        { "id": 5, "label": "Réchauffage Carbu. Froid" },
+        { "id": 6, "label": "Robinet Essence Ouvert Partout" },
+        { "id": 7, "label": "Niveaux Réservoirs Vérifiés" },
+        { "id": 8, "label": "Balise de détresse ARM / Voyant éteint" },
+        { "id": 9, "label": "Feux de navigation Disjonctés" },
+        { "id": 10, "label": "Anticollision Marche" },
+        { "id": 11, "label": "Disjoncteur Radio Enclenché" },
+        { "id": 12, "label": "Radio Arrêt" },
+        { "id": 13, "label": "Altimètre QNH (ou FL en vol)" },
+        { "id": 14, "label": "Mixture Plein Riche" },
+        { "id": 15, "label": "Génératrice électrique Disjonctée" }
+      ]
+    },
+    {
+      "order": 3,
+      "name": "3. AVANT MISE EN ROUTE",
+      "items": [
+        { "id": 1, "label": "Batterie Marche" },
+        { "id": 2, "label": "Sélection Magnétos Both" },
+        { "id": 3, "label": "Injections A la demande" },
+        { "id": 4, "label": "Manette des Gaz 1 cm" },
+        { "id": 5, "label": "Freins aux pieds Serrés" }
+      ]
+    },
+    {
+      "order": 4,
+      "name": "4. MISE EN ROUTE",
+      "items": [
+        { "id": 1, "label": "Champ Hélice Dégagé" },
+        { "id": 2, "label": "Démarreur Actionné (15\" max.)" },
+        { "id": 3, "label": "Régime 1000 Tr / mn" },
+        { "id": 4, "label": "Pression d’huile Vérifiée" }
+      ]
+    },
+    {
+      "order": 5,
+      "name": "5. APRES MISE EN ROUTE",
+      "items": [
+        { "id": 1, "label": "Magnétos Essai coupure" },
+        { "id": 2, "label": "Régime 1200 Tr / Mn" },
+        { "id": 3, "label": "Génératrice électrique Enclenchée" },
+        { "id": 4, "label": "Charge Vérifiée" },
+        { "id": 5, "label": "Radio Sur Marche" },
+        { "id": 6, "label": "Fréquences / Volumes Contrôlées / Ajustés" },
+        { "id": 7, "label": "Code affiché" },
+        { "id": 8, "label": "Emission / Alt" }
+      ]
+    },
+    {
+      "order": 6,
+      "name": "6. AVANT ROULAGE",
+      "items": [
+        { "id": 1, "label": "Heure bloc Notée" },
+        { "id": 2, "label": "Annonce radio Effectuée" }
+      ]
+    },
+    {
+      "order": 7,
+      "name": "7. ROULAGE",
+      "items": [
+        { "id": 1, "label": "Freins Essayés" },
+        { "id": 2, "label": "Vérification Bille Inverse du virage" }
+      ]
+    },
+    {
+      "order": 8,
+      "name": "8. ESSAIS MOTEUR",
+      "items": [
+        { "id": 1, "label": "Freins Serrés" },
+        { "id": 2, "label": "Température d'huile Suffisante" },
+        { "id": 3, "label": "Réchauffage Carbu. Poussé sur Froid" },
+        { "id": 4, "label": "Régime 1800 Tr / Mn" },
+        { "id": 5, "label": "Magnétos Chute < 125 Tr / Mn" },
+        { "id": 6, "label": "Magnétos Both Ecart < 75 Tr / Mn" },
+        { "id": 7, "label": "Réchauffe Carburateur Essayée" },
+        { "id": 8, "label": "Ralenti +/- 700 Tr / Mn" }
+      ]
+    },
+    {
+      "order": 9,
+      "name": "9. AVANT ALIGNEMENT",
+      "items": [
+        { "id": 1, "label": "Porte Fermée et Enclenchée" },
+        { "id": 2, "label": "Ceintures (AV + AR) Attachées" },
+        { "id": 3, "label": "Compensateur Neutre" },
+        { "id": 4, "label": "Commandes de vol Libres" },
+        { "id": 5, "label": "Contact Magnétos Both" },
+        { "id": 6, "label": "Géné. élect. / Charge Enfoncée / Vérifiée" },
+        { "id": 7, "label": "Pression / Tempé. Huile Vérifiée / Correcte" },
+        { "id": 8, "label": "Essence / Autonomie Ouvert Partout / Vérifiée" },
+        { "id": 9, "label": "Mélange Plein Riche" },
+        { "id": 10, "label": "Réchauffage Carbu. Froid" },
+        { "id": 11, "label": "Briefing / Approche Réalisé / Libre" },
+        { "id": 12, "label": "Annonce radio Effectuée" }
+      ]
+    },
+    {
+      "order": 10,
+      "name": "10. ALIGNE SUR LA PISTE",
+      "items": [
+        { "id": 1, "label": "Compas magnétique Comparé" },
+        { "id": 2, "label": "Altimètre Vérifié" },
+        { "id": 3, "label": "Transpondeur Sur ALT" },
+        { "id": 4, "label": "Manche à air Observée" }
+      ]
+    }
+  ]
+}
