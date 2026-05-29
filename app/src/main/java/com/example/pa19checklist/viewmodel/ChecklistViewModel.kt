@@ -48,8 +48,8 @@ data class ChecklistUiState(
 val shutdownChecklistItems = listOf(
     "Roue Arrière Alignée",
     "Régime Moteur 1000 Tr / Mn",
-    "Annonce / puis radio Effectuée / Arrêt",
-    "Transpondeur Arrêt",
+    "Annonce Effectuée\nArrêt Radio",
+    "Transpondeur Arrêt 7000",
     "Balise de détresse Balise silencieuse",
     "Magnétos Essai coupure",
     "Génératrice électrique Arrêt",
@@ -57,8 +57,7 @@ val shutdownChecklistItems = listOf(
     "Contact Magnétos Sur OFF",
     "Anticoll / Feux de Nav. Arrêt / Coupés",
     "Batterie Arrêt",
-    "Horamètre / Carnet Noté / Rempli",
-    "Capot / Bords d'attaque Nettoyés"
+    "Horamètre Noté"
 )
 
 class ChecklistViewModel(
