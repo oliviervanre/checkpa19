@@ -18,6 +18,8 @@ data class ChecklistUiState(
     val sessionState: SessionState = SessionState(),
     val isPaused: Boolean = false,
     val showStartMemo: Boolean = false,
+    val showShutdownChecklist: Boolean = false,
+    val shutdownItemIndex: Int = 0,
     val errorMessage: String? = null
 ) {
     val currentPhase: Phase?
@@ -38,7 +40,26 @@ data class ChecklistUiState(
             return sessionState.currentPhaseIndex == phaseCount - 1 &&
                 sessionState.currentItemIndex >= phase.items.size
         }
+
+    val isShutdownCompleted: Boolean
+        get() = shutdownItemIndex >= shutdownChecklistItems.size
 }
+
+val shutdownChecklistItems = listOf(
+    "Roue Arrière Alignée",
+    "Régime Moteur 1000 Tr / Mn",
+    "Annonce / puis radio Effectuée / Arrêt",
+    "Transpondeur Arrêt",
+    "Balise de détresse Balise silencieuse",
+    "Magnétos Essai coupure",
+    "Génératrice électrique Arrêt",
+    "Mélange Etouffoir",
+    "Contact Magnétos Sur OFF",
+    "Anticoll / Feux de Nav. Arrêt / Coupés",
+    "Batterie Arrêt",
+    "Horamètre / Carnet Noté / Rempli",
+    "Capot / Bords d'attaque Nettoyés"
+)
 
 class ChecklistViewModel(
     application: Application
@@ -59,6 +80,12 @@ class ChecklistViewModel(
         val currentPhase = state.currentPhase ?: return
 
         if (state.isCompleted) return
+
+        if (state.sessionState.currentPhaseIndex == aircraft.phases.lastIndex) {
+            val completionState = state.sessionState.copy(currentItemIndex = currentPhase.items.size)
+            persistSession(completionState)
+            return
+        }
 
         val nextSessionState = if (state.sessionState.currentItemIndex < currentPhase.items.lastIndex) {
             state.sessionState.copy(currentItemIndex = state.sessionState.currentItemIndex + 1)
@@ -82,6 +109,22 @@ class ChecklistViewModel(
         uiState.value = uiState.value.copy(showStartMemo = false)
     }
 
+    fun showShutdownChecklist() {
+        uiState.value = uiState.value.copy(
+            showShutdownChecklist = true,
+            shutdownItemIndex = 0
+        )
+    }
+
+    fun validateShutdownItem() {
+        val state = uiState.value
+        if (!state.showShutdownChecklist || state.isShutdownCompleted) return
+
+        uiState.value = state.copy(
+            shutdownItemIndex = (state.shutdownItemIndex + 1).coerceAtMost(shutdownChecklistItems.size)
+        )
+    }
+
     fun resetSession() {
         if (uiState.value.aircraft == null) {
             loadChecklist()
@@ -95,6 +138,8 @@ class ChecklistViewModel(
             sessionState = safeState,
             isPaused = false,
             showStartMemo = true,
+            showShutdownChecklist = false,
+            shutdownItemIndex = 0,
             errorMessage = null
         )
     }
@@ -115,6 +160,8 @@ class ChecklistViewModel(
                 isPaused = false,
                 showStartMemo = restoredSession.currentPhaseIndex == 0 &&
                     restoredSession.currentItemIndex == 0,
+                showShutdownChecklist = false,
+                shutdownItemIndex = 0,
                 errorMessage = null
             )
         }.onFailure {

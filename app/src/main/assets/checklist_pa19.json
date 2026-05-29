@@ -68,8 +68,8 @@
         { "id": 4, "label": "Charge Vérifiée" },
         { "id": 5, "label": "Radio Sur Marche" },
         { "id": 6, "label": "Fréquences / Volumes Contrôlées / Ajustés" },
-        { "id": 7, "label": "Code affiché" },
-        { "id": 8, "label": "Emission / Alt" }
+        { "id": 7, "label": "Transpondeur Code affiché" },
+        { "id": 8, "label": "Transpondeur Emission / Alt" }
       ]
     },
     {

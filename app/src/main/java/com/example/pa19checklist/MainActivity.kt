@@ -22,16 +22,17 @@ class MainActivity : ComponentActivity() {
             )
             val uiState by viewModel.uiState
 
-            KeepScreenOnEffect(keepScreenOn = !uiState.isPaused)
+            KeepScreenOnEffect(keepScreenOn = true)
 
             PA19ChecklistTheme {
                 ChecklistScreen(
                     uiState = uiState,
                     onValidate = viewModel::validateCurrentItem,
-                    onPauseToggle = viewModel::togglePause,
+                    onValidateShutdown = viewModel::validateShutdownItem,
                     onReset = viewModel::resetSession,
                     onFinish = viewModel::finishChecklist,
-                    onStart = viewModel::dismissStartMemo
+                    onStart = viewModel::dismissStartMemo,
+                    onShowShutdownChecklist = viewModel::showShutdownChecklist
                 )
             }
         }

@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -21,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,19 +34,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pa19checklist.data.model.Item
 import com.example.pa19checklist.viewmodel.ChecklistUiState
+import com.example.pa19checklist.viewmodel.shutdownChecklistItems
 
 @Composable
 fun ChecklistScreen(
     uiState: ChecklistUiState,
     onValidate: () -> Unit,
-    onPauseToggle: () -> Unit,
+    onValidateShutdown: () -> Unit,
     onReset: () -> Unit,
     onFinish: () -> Unit,
-    onStart: () -> Unit
+    onStart: () -> Unit,
+    onShowShutdownChecklist: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -92,9 +99,18 @@ fun ChecklistScreen(
         }
 
         if (uiState.isCompleted) {
-            CompletionSpeedsScreen(
-                onFinish = onFinish
-            )
+            if (uiState.showShutdownChecklist) {
+                ShutdownChecklistScreen(
+                    currentItemIndex = uiState.shutdownItemIndex,
+                    isCompleted = uiState.isShutdownCompleted,
+                    onValidate = onValidateShutdown,
+                    onFinish = onFinish
+                )
+            } else {
+                CompletionSpeedsScreen(
+                    onShowShutdownChecklist = onShowShutdownChecklist
+                )
+            }
             return@Surface
         }
 
@@ -107,10 +123,17 @@ fun ChecklistScreen(
             currentItemIndex < 0 -> 0
             else -> currentItemIndex
         }
+        val anchoredOffset = -96
 
-        LaunchedEffect(uiState.sessionState.currentPhaseIndex, uiState.sessionState.currentItemIndex) {
+        LaunchedEffect(
+            uiState.sessionState.currentPhaseIndex,
+            uiState.sessionState.currentItemIndex
+        ) {
             if (phase.items.isNotEmpty()) {
-                listState.animateScrollToItem(index = scrollTarget)
+                listState.animateScrollToItem(
+                    index = scrollTarget,
+                    scrollOffset = anchoredOffset
+                )
             }
         }
 
@@ -121,57 +144,74 @@ fun ChecklistScreen(
         ) {
             Header(
                 phasePosition = "${uiState.phaseNumber} / ${uiState.phaseCount}",
-                phaseName = phase.name
+                phaseName = phase.name,
+                isCritical = uiState.sessionState.currentPhaseIndex == 8
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                state = listState,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(bottom = 16.dp)
-            ) {
-                itemsIndexed(phase.items) { index, item ->
-                    val itemState = when {
-                        currentItemIndex > phase.items.lastIndex -> ItemVisualState.Done
-                        index < currentItemIndex -> ItemVisualState.Done
-                        index == currentItemIndex -> ItemVisualState.Current
-                        else -> ItemVisualState.Next
-                    }
-
-                    ItemRow(
-                        index = index + 1,
-                        item = item,
-                        state = itemState
+            if (uiState.sessionState.currentPhaseIndex == 9) {
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    PhaseTenSummary(items = phase.items.map { it.label })
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    state = listState,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(
+                        top = 140.dp,
+                        bottom = 140.dp
                     )
+                ) {
+                    itemsIndexed(phase.items) { index, item ->
+                        val itemState = when {
+                            currentItemIndex > phase.items.lastIndex -> ItemVisualState.Done
+                            index < currentItemIndex -> ItemVisualState.Done
+                            index == currentItemIndex -> ItemVisualState.Current
+                            else -> ItemVisualState.Next
+                        }
+
+                        ItemRow(
+                            index = index + 1,
+                            item = item,
+                            state = itemState
+                        )
+                    }
                 }
             }
 
             ActionBar(
-                isPaused = uiState.isPaused,
                 canValidate = true,
                 onValidate = onValidate,
-                onPauseToggle = onPauseToggle
+                label = if (uiState.sessionState.currentPhaseIndex == 9) "VITESSES" else "VALIDER"
             )
         }
     }
 }
 
 @Composable
-private fun Header(phasePosition: String, phaseName: String) {
+private fun Header(phasePosition: String, phaseName: String, isCritical: Boolean) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = MaterialTheme.colorScheme.surface,
+                color = if (isCritical) Color(0xFFFFF3CD) else MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(20.dp)
+            )
+            .border(
+                width = if (isCritical) 2.dp else 0.dp,
+                color = if (isCritical) Color(0xFFD62828) else Color.Transparent,
                 shape = RoundedCornerShape(20.dp)
             )
             .padding(20.dp)
     ) {
         Text(
             text = phasePosition,
-            color = MaterialTheme.colorScheme.primary,
+            color = if (isCritical) Color(0xFFD62828) else MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
             fontSize = 24.sp
         )
@@ -183,14 +223,37 @@ private fun Header(phasePosition: String, phaseName: String) {
             fontSize = 30.sp,
             lineHeight = 34.sp
         )
+        if (isCritical) {
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "Phase critique avant decollage",
+                color = Color(0xFFD62828),
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
+        }
     }
 }
 
 @Composable
 fun ItemRow(index: Int, item: Item, state: ItemVisualState) {
+    ItemRow(
+        index = index,
+        label = item.label,
+        state = state
+    )
+}
+
+@Composable
+private fun ItemRow(
+    index: Int,
+    label: String,
+    state: ItemVisualState,
+    isCriticalCurrent: Boolean = false
+) {
     val backgroundColor = when (state) {
         ItemVisualState.Done -> MaterialTheme.colorScheme.surfaceVariant
-        ItemVisualState.Current -> MaterialTheme.colorScheme.primary
+        ItemVisualState.Current -> if (isCriticalCurrent) Color(0xFFD62828) else MaterialTheme.colorScheme.primary
         ItemVisualState.Next -> MaterialTheme.colorScheme.surface
     }
     val textColor = when (state) {
@@ -243,7 +306,7 @@ fun ItemRow(index: Int, item: Item, state: ItemVisualState) {
         Spacer(modifier = Modifier.size(16.dp))
 
         Text(
-            text = item.label,
+            text = label,
             color = textColor,
             fontSize = titleSize,
             lineHeight = lineHeight,
@@ -258,55 +321,34 @@ fun ItemRow(index: Int, item: Item, state: ItemVisualState) {
 
 @Composable
 fun ActionBar(
-    isPaused: Boolean,
     canValidate: Boolean,
     onValidate: () -> Unit,
-    onPauseToggle: () -> Unit
+    label: String
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    Button(
+        onClick = onValidate,
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(bottom = 20.dp)
+            .height(64.dp),
+        enabled = canValidate,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        ),
+        shape = RoundedCornerShape(32.dp)
     ) {
-        Button(
-            onClick = onValidate,
-            modifier = Modifier
-                .weight(1f)
-                .height(72.dp),
-            enabled = canValidate,
-            shape = RoundedCornerShape(18.dp)
-        ) {
-            Text(
-                text = "VALIDER",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Button(
-            onClick = onPauseToggle,
-            modifier = Modifier
-                .weight(1f)
-                .height(72.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (isPaused) {
-                    MaterialTheme.colorScheme.secondary
-                } else {
-                    MaterialTheme.colorScheme.surfaceVariant
-                },
-                contentColor = if (isPaused) {
-                    MaterialTheme.colorScheme.onSecondary
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                }
-            ),
-            shape = RoundedCornerShape(18.dp)
-        ) {
-            Text(
-                text = if (isPaused) "REPRENDRE" else "PAUSE",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        Icon(
+            imageVector = Icons.Filled.CheckCircle,
+            contentDescription = null
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(
+            text = label,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
@@ -351,6 +393,8 @@ private fun CompletionMemoScreen(onFinish: () -> Unit) {
             onClick = onFinish,
             modifier = Modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(bottom = 20.dp)
                 .height(72.dp),
             shape = RoundedCornerShape(18.dp)
         ) {
@@ -365,8 +409,6 @@ private fun CompletionMemoScreen(onFinish: () -> Unit) {
 
 @Composable
 private fun StartMemoScreen(onStart: () -> Unit) {
-    val scrollState = rememberScrollState()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -375,7 +417,6 @@ private fun StartMemoScreen(onStart: () -> Unit) {
         Column(
             modifier = Modifier
                 .weight(1f)
-                .verticalScroll(scrollState)
                 .background(
                     color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(20.dp)
@@ -389,7 +430,7 @@ private fun StartMemoScreen(onStart: () -> Unit) {
         ) {
             MemoTitle(title = "MEMO PA19")
             Spacer(modifier = Modifier.height(16.dp))
-            FullMemoContent()
+            StartMemoContent()
         }
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -398,6 +439,8 @@ private fun StartMemoScreen(onStart: () -> Unit) {
             onClick = onStart,
             modifier = Modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(bottom = 20.dp)
                 .height(72.dp),
             shape = RoundedCornerShape(18.dp)
         ) {
@@ -411,7 +454,7 @@ private fun StartMemoScreen(onStart: () -> Unit) {
 }
 
 @Composable
-private fun CompletionSpeedsScreen(onFinish: () -> Unit) {
+private fun CompletionSpeedsScreen(onShowShutdownChecklist: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -461,16 +504,139 @@ private fun CompletionSpeedsScreen(onFinish: () -> Unit) {
         Spacer(modifier = Modifier.height(12.dp))
 
         Button(
-            onClick = onFinish,
+            onClick = onShowShutdownChecklist,
             modifier = Modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(bottom = 20.dp)
                 .height(72.dp),
             shape = RoundedCornerShape(18.dp)
         ) {
             Text(
-                text = "TERMINER",
+                text = "ARRET MOTEUR",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+private fun ShutdownChecklistScreen(
+    currentItemIndex: Int,
+    isCompleted: Boolean,
+    onValidate: () -> Unit,
+    onFinish: () -> Unit
+) {
+    val listState = rememberLazyListState()
+    val scrollTarget = when {
+        shutdownChecklistItems.isEmpty() -> 0
+        currentItemIndex >= shutdownChecklistItems.size -> shutdownChecklistItems.lastIndex
+        currentItemIndex < 0 -> 0
+        else -> currentItemIndex
+    }
+    val anchoredOffset = -96
+
+    LaunchedEffect(currentItemIndex) {
+        if (shutdownChecklistItems.isNotEmpty()) {
+            listState.animateScrollToItem(
+                index = scrollTarget,
+                scrollOffset = anchoredOffset
+            )
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp, vertical = 20.dp)
+    ) {
+        Header(
+            phasePosition = "12 / 12",
+            phaseName = "ARRET MOTEUR",
+            isCritical = false
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            state = listState,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(
+                top = 140.dp,
+                bottom = 140.dp
+            )
+        ) {
+            itemsIndexed(shutdownChecklistItems) { index, label ->
+                val itemState = when {
+                    currentItemIndex > shutdownChecklistItems.lastIndex -> ItemVisualState.Done
+                    index < currentItemIndex -> ItemVisualState.Done
+                    index == currentItemIndex -> ItemVisualState.Current
+                    else -> ItemVisualState.Next
+                }
+
+                ItemRow(
+                    index = index + 1,
+                    label = label,
+                    state = itemState,
+                    isCriticalCurrent = index == 8 && itemState == ItemVisualState.Current
+                )
+            }
+        }
+
+        if (isCompleted) {
+            Button(
+                onClick = onFinish,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(bottom = 20.dp)
+                    .height(72.dp),
+                shape = RoundedCornerShape(18.dp)
+            ) {
+                Text(
+                    text = "TERMINER",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        } else {
+            ActionBar(
+                canValidate = true,
+                onValidate = onValidate,
+                label = "VALIDER"
+            )
+        }
+    }
+}
+
+@Composable
+private fun PhaseTenSummary(items: List<String>) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(24.dp)
+            )
+            .padding(22.dp)
+    ) {
+        Text(
+            text = "ALIGNE SUR LA PISTE",
+            color = MaterialTheme.colorScheme.onPrimary,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.ExtraBold
+        )
+        Spacer(modifier = Modifier.height(14.dp))
+        items.forEachIndexed { index, label ->
+            Text(
+                text = "${index + 1}. $label",
+                color = MaterialTheme.colorScheme.onPrimary,
+                fontSize = 22.sp,
+                lineHeight = 28.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(bottom = 10.dp)
             )
         }
     }
@@ -544,6 +710,44 @@ private fun FullMemoContent() {
             "Base : 1500-1700 tr/min    70 MPH",
             "(Rechauffe carbu tiree)",
             "Finale : 60 MPH (+Kve)"
+        )
+    )
+}
+
+@Composable
+private fun StartMemoContent() {
+    MemoSection(
+        title = "Masse vide",
+        lines = listOf(
+            "voir fiche pesee",
+            "M max : 681 kg",
+            "Bagages : 23 kg (en soute)"
+        )
+    )
+    MemoSection(
+        title = "Carburant",
+        lines = listOf(
+            "100LL, capacite totale = 136 l",
+            "2 reservoirs d'ailes non communicants = 2x68 l",
+            "Consommation : 19 l/h"
+        )
+    )
+    MemoSection(
+        title = "Huile",
+        lines = listOf(
+            "SAE40 ; aero D80 ; max = 4,8 l ; min = 1,8 l"
+        )
+    )
+    MemoSection(
+        title = "Vitesses caracteristiques",
+        lines = listOf(
+            "VNE : 138 MPH",
+            "VNO : 110 MPH",
+            "Va : 94 MPH",
+            "VS : 44 MPH",
+            "Vz max : 71 MPH",
+            "Pente max : 63,5 MPH",
+            "V plane optima : 70 MPH"
         )
     )
 }
