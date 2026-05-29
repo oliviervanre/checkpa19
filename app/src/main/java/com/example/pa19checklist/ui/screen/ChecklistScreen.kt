@@ -38,6 +38,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pa19checklist.BuildConfig
 import com.example.pa19checklist.data.model.Item
 import com.example.pa19checklist.viewmodel.ChecklistUiState
 import com.example.pa19checklist.viewmodel.shutdownChecklistItems
@@ -428,7 +429,10 @@ private fun StartMemoScreen(onStart: () -> Unit) {
                 )
                 .padding(16.dp)
         ) {
-            MemoTitle(title = "MEMO PA19")
+            MemoTitle(
+                title = "MEMO PA19",
+                versionLabel = "v${BuildConfig.VERSION_NAME}"
+            )
             Spacer(modifier = Modifier.height(16.dp))
             StartMemoContent()
         }
@@ -643,7 +647,7 @@ private fun PhaseTenSummary(items: List<String>) {
 }
 
 @Composable
-private fun MemoTitle(title: String) {
+private fun MemoTitle(title: String, versionLabel: String? = null) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -654,12 +658,29 @@ private fun MemoTitle(title: String) {
             .padding(vertical = 12.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = title,
-            color = MaterialTheme.colorScheme.onSecondary,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.ExtraBold
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = title,
+                color = MaterialTheme.colorScheme.onSecondary,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.ExtraBold
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            if (versionLabel != null) {
+                Text(
+                    text = versionLabel,
+                    color = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.72f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            } else {
+                Spacer(modifier = Modifier.width(28.dp))
+            }
+        }
     }
 }
 
